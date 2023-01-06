@@ -1,6 +1,9 @@
 
-const cacheKey = 'mySampleCacheKey';
- 
+const cacheKey = 'mySampleCacheKey_v2';
+
+// Specify allowed cache keys
+const cacheAllowList = ['mySampleCacheKey_v2'];
+
 // installation
 self.addEventListener('install', (event) => {
     console.log('Worker is installing.');
@@ -14,6 +17,24 @@ self.addEventListener('install', (event) => {
                     '/', // from root folder
                     '/css/style.css', // everything from /css folder
                 ]);
+            })
+    );
+});
+
+self.addEventListener('activate', (event) => {
+    console.log('Worker is activating.');
+
+    // Get all the currently active `Cache` instances.
+    event.waitUntil(
+        caches.keys()
+            .then((keys) => {
+                // Delete all caches that aren't in the allow list:
+                return Promise.all(
+                    keys.map((key) => {
+                        if (!cacheAllowList.includes(key)) {
+                            return caches.delete(key);
+                        }
+                    }));
             })
     );
 });
