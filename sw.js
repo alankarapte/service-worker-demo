@@ -15,6 +15,7 @@ self.addEventListener('install', (event) => {
                 // `Cache` instance for later use.
                 return cache.addAll([
                     '/', // from root folder
+                    '/main.js', // from root folder
                     '/css/style.css', // everything from /css folder
                 ]);
             })
@@ -35,6 +36,25 @@ self.addEventListener('activate', (event) => {
                             return caches.delete(key);
                         }
                     }));
+            })
+    );
+});
+
+
+self.addEventListener('fetch', (event) => {
+    console.log('funcational event: fetch');
+    console.log('TEST: ', event.request);
+
+    event.respondWith(
+        caches.match(event.request)
+            .then(response => {
+                // cache hit ~ return response
+                if (response) {
+                    return response;
+                }
+                return fetch(event.request)
+                    //fallback to cache anyway
+                    .catch(() => caches.match(event.request));
             })
     );
 });
